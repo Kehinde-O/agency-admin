@@ -16,13 +16,13 @@ import {
 import { checkAdminAuth, getAdminUser, clearAdminAuth } from '@/lib/auth'
 import { safeCharAt } from '@/lib/error-handler'
 import { PageProvider, usePageTitle } from '@/contexts/PageContext'
+import AuthGuard from '@/components/AuthGuard'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
 function DashboardLayoutContent({ children }: DashboardLayoutProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [adminUser, setAdminUser] = useState<any>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const router = useRouter()
@@ -30,21 +30,12 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
   const { title, subtitle } = usePageTitle()
 
   useEffect(() => {
-    const checkAuth = () => {
-      const auth = checkAdminAuth()
-      const user = getAdminUser()
-      
-      if (auth && user) {
-        setIsAuthenticated(true)
-        setAdminUser(user)
-      } else {
-        clearAdminAuth()
-        router.push('/')
-      }
+    // Get admin user from localStorage
+    const user = getAdminUser()
+    if (user) {
+      setAdminUser(user)
     }
-
-    checkAuth()
-  }, [router])
+  }, [])
 
   // Add a check to handle token expiration
   useEffect(() => {
@@ -76,14 +67,6 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
       clearAdminAuth()
       router.push('/')
     }
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500"></div>
-      </div>
-    )
   }
 
   const sidebarItems = [

@@ -47,9 +47,15 @@ export default function GoogleMapView({
   const [mapZoom, setMapZoom] = useState(zoom)
   const [mapCenter, setMapCenter] = useState(center || { lat: 6.5244, lng: 3.3792 }) // Lagos coordinates
 
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyDnZyWDH9hqHvzw6ewgPmBqXzNpH1loSQA'
+  const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
   useEffect(() => {
+    // Check if API key is available
+    if (!GOOGLE_MAPS_API_KEY) {
+      console.error('GoogleMapView: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not defined')
+      return
+    }
+
     const loadGoogleMaps = () => {
       if (window.google) {
         initializeMap()

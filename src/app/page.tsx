@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react'
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('kehindejohnomotoso+admin@gmail.com')
+  const [password, setPassword] = useState('@@##Admin01')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -40,7 +40,16 @@ export default function AdminLogin() {
         localStorage.setItem('adminRefreshToken', data.data.refreshToken)
         localStorage.setItem('adminUser', JSON.stringify(data.data.user))
         
-        router.push('/dashboard')
+        console.log('Login successful, stored auth data:', {
+          adminAuth: localStorage.getItem('adminAuth'),
+          hasToken: !!localStorage.getItem('adminToken'),
+          hasUser: !!localStorage.getItem('adminUser')
+        })
+        
+        // Add a small delay to ensure localStorage is set
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 100)
       } else {
         // Always show generic error message for security
         setError('Invalid email or password')
@@ -145,8 +154,18 @@ export default function AdminLogin() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 text-sm mb-4">
             © 2024 Agency Admin. All rights reserved.
+          </p>
+          <p className="text-slate-400 text-xs">
+            Having trouble? Try the{' '}
+            <a 
+              href="/force-login" 
+              className="text-slate-600 hover:text-slate-800 underline"
+            >
+              Force Login
+            </a>{' '}
+            page.
           </p>
         </div>
       </div>

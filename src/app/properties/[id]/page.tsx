@@ -34,6 +34,15 @@ export default function PropertyDetailsPage() {
     const loadProperty = async () => {
       try {
         setIsLoading(true)
+        
+        // Check if we have authentication token
+        const token = localStorage.getItem('adminToken')
+        if (!token) {
+          console.log('No authentication token found, redirecting to login')
+          router.push('/simple-login')
+          return
+        }
+        
         const response = await apiService.getPropertyById(params.id as string)
         
         if (response.success) {
@@ -240,7 +249,7 @@ export default function PropertyDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
 
       {/* Main Content */}
       <div className="max-w-full mx-auto px-6 py-6">
@@ -260,17 +269,8 @@ export default function PropertyDetailsPage() {
             {/* Property Owner */}
             <PropertyOwnerCard property={property} />
 
-            {/* Bookings */}
-            <PropertyBookingsList 
-              bookings={bookings} 
-              propertyTitle={property.title} 
-            />
-
-            {/* Analytics */}
-            <PropertyAnalytics property={property} />
-
-            {/* Reviews */}
-            <PropertyReviews property={property} />
+            {/* Interactive Map - Moved to main content */}
+            <PropertyMapView property={property} />
 
             {/* Approval History */}
             <ApprovalHistoryTimeline property={property} />
@@ -293,18 +293,6 @@ export default function PropertyDetailsPage() {
               onExport={handleExport}
               isProcessing={isProcessing}
             />
-
-            {/* Quality Score */}
-            <PropertyQualityScore property={property} />
-
-            {/* Price Analysis */}
-            <PropertyPriceAnalysis 
-              property={property} 
-              similarProperties={similarProperties} 
-            />
-
-            {/* Interactive Map */}
-            <PropertyMapView property={property} />
           </div>
         </div>
       </div>

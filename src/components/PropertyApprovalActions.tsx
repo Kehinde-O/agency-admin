@@ -71,7 +71,7 @@ export default function PropertyApprovalActions({
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toUpperCase()) {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       case 'ACTIVE':
@@ -81,32 +81,84 @@ export default function PropertyApprovalActions({
       case 'INACTIVE':
         return 'bg-gray-100 text-gray-800 border-gray-200'
       case 'DRAFT':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-purple-100 text-purple-800 border-purple-200'
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
+  // Determine available actions based on property status
+  const getAvailableActions = () => {
+    const status = property.status?.toUpperCase()
+    
+    switch (status) {
+      case 'PENDING':
+        return {
+          canApprove: true,
+          canReject: true,
+          canPullDown: false,
+          canReactivate: false
+        }
+      case 'ACTIVE':
+        return {
+          canApprove: false,
+          canReject: false,
+          canPullDown: true,
+          canReactivate: false
+        }
+      case 'INACTIVE':
+        return {
+          canApprove: false,
+          canReject: false,
+          canPullDown: false,
+          canReactivate: true
+        }
+      case 'REJECTED':
+        return {
+          canApprove: true,
+          canReject: false,
+          canPullDown: false,
+          canReactivate: false
+        }
+      case 'DRAFT':
+        return {
+          canApprove: true,
+          canReject: true,
+          canPullDown: false,
+          canReactivate: false
+        }
+      default:
+        return {
+          canApprove: false,
+          canReject: false,
+          canPullDown: false,
+          canReactivate: false
+        }
+    }
+  }
+
+  const availableActions = getAvailableActions()
+
   return (
     <>
-      <div className="bg-white rounded-2xl shadow-lg border border-slate-200/50 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-xl border border-purple-200/50 overflow-hidden">
         <div className="p-8">
           <div className="flex items-center mb-6">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mr-4">
-              <Settings className="w-6 h-6 text-purple-600" />
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+              <Settings className="w-6 h-6 text-white" />
             </div>
             <div>
               <h3 className="text-xl font-bold text-slate-900">Admin Actions</h3>
-              <p className="text-sm text-slate-600">Manage property status and perform administrative tasks</p>
+              <p className="text-sm text-purple-600">Manage property status and perform administrative tasks</p>
             </div>
           </div>
 
           {/* Current Status */}
-          <div className="mb-8 p-6 bg-gradient-to-r from-slate-50 to-white rounded-2xl border border-slate-200/50">
+          <div className="mb-8 p-6 bg-gradient-to-r from-purple-50 to-white rounded-2xl border border-purple-200/50">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-lg font-semibold text-slate-900">Current Status</h4>
-                <p className="text-sm text-slate-600">Property listing status</p>
+                <p className="text-sm text-purple-600">Property listing status</p>
               </div>
               <span className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold border ${getStatusColor(property.status)}`}>
                 {property.status}
@@ -116,44 +168,44 @@ export default function PropertyApprovalActions({
 
           {/* Primary Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            {property.approvalStatus?.canApprove && (
+            {availableActions.canApprove && (
               <button
                 onClick={() => setShowApprovalModal(true)}
                 disabled={isProcessing}
-                className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <CheckCircle className="w-5 h-5 mr-2" />
                 Approve Property
               </button>
             )}
 
-            {property.approvalStatus?.canReject && (
+            {availableActions.canReject && (
               <button
                 onClick={() => setShowRejectionModal(true)}
                 disabled={isProcessing}
-                className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <XCircle className="w-5 h-5 mr-2" />
                 Reject Property
               </button>
             )}
 
-            {property.approvalStatus?.canPullDown && (
+            {availableActions.canPullDown && (
               <button
                 onClick={() => setShowPullDownModal(true)}
                 disabled={isProcessing}
-                className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-orange-600 to-orange-700 text-white font-semibold rounded-xl hover:from-orange-700 hover:to-orange-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-orange-600 to-orange-700 text-white font-semibold rounded-xl hover:from-orange-700 hover:to-orange-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <AlertTriangle className="w-5 h-5 mr-2" />
                 Pull Down Property
               </button>
             )}
 
-            {property.approvalStatus?.canReactivate && (
+            {availableActions.canReactivate && (
               <button
                 onClick={() => setShowReactivateModal(true)}
                 disabled={isProcessing}
-                className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <RotateCcw className="w-5 h-5 mr-2" />
                 Reactivate Property
@@ -165,7 +217,7 @@ export default function PropertyApprovalActions({
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <button
               onClick={onEdit}
-              className="flex items-center justify-center px-4 py-3 bg-slate-50 text-slate-700 font-medium rounded-xl hover:bg-slate-100 transition-all duration-200 border border-slate-200 hover:border-slate-300"
+              className="flex items-center justify-center px-4 py-3 bg-purple-50 text-purple-700 font-medium rounded-xl hover:bg-purple-100 transition-all duration-300 border border-purple-200 hover:border-purple-300 hover:shadow-md"
             >
               <Edit className="w-4 h-4 mr-2" />
               Edit Details
@@ -173,7 +225,7 @@ export default function PropertyApprovalActions({
 
             <button
               onClick={onFlag}
-              className="flex items-center justify-center px-4 py-3 bg-slate-50 text-slate-700 font-medium rounded-xl hover:bg-slate-100 transition-all duration-200 border border-slate-200 hover:border-slate-300"
+              className="flex items-center justify-center px-4 py-3 bg-purple-50 text-purple-700 font-medium rounded-xl hover:bg-purple-100 transition-all duration-300 border border-purple-200 hover:border-purple-300 hover:shadow-md"
             >
               <Flag className="w-4 h-4 mr-2" />
               Flag for Review
@@ -181,7 +233,7 @@ export default function PropertyApprovalActions({
 
             <button
               onClick={onContact}
-              className="flex items-center justify-center px-4 py-3 bg-slate-50 text-slate-700 font-medium rounded-xl hover:bg-slate-100 transition-all duration-200 border border-slate-200 hover:border-slate-300"
+              className="flex items-center justify-center px-4 py-3 bg-purple-50 text-purple-700 font-medium rounded-xl hover:bg-purple-100 transition-all duration-300 border border-purple-200 hover:border-purple-300 hover:shadow-md"
             >
               <Settings className="w-4 h-4 mr-2" />
               Contact Owner
@@ -189,7 +241,7 @@ export default function PropertyApprovalActions({
 
             <button
               onClick={onViewMobile}
-              className="flex items-center justify-center px-4 py-3 bg-slate-50 text-slate-700 font-medium rounded-xl hover:bg-slate-100 transition-all duration-200 border border-slate-200 hover:border-slate-300"
+              className="flex items-center justify-center px-4 py-3 bg-purple-50 text-purple-700 font-medium rounded-xl hover:bg-purple-100 transition-all duration-300 border border-purple-200 hover:border-purple-300 hover:shadow-md"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               View on Mobile
@@ -197,7 +249,7 @@ export default function PropertyApprovalActions({
 
             <button
               onClick={onExport}
-              className="flex items-center justify-center px-4 py-3 bg-slate-50 text-slate-700 font-medium rounded-xl hover:bg-slate-100 transition-all duration-200 border border-slate-200 hover:border-slate-300"
+              className="flex items-center justify-center px-4 py-3 bg-purple-50 text-purple-700 font-medium rounded-xl hover:bg-purple-100 transition-all duration-300 border border-purple-200 hover:border-purple-300 hover:shadow-md"
             >
               <Download className="w-4 h-4 mr-2" />
               Export Data
@@ -205,7 +257,7 @@ export default function PropertyApprovalActions({
 
             <button
               onClick={onDelete}
-              className="flex items-center justify-center px-4 py-3 bg-red-50 text-red-700 font-medium rounded-xl hover:bg-red-100 transition-all duration-200 border border-red-200 hover:border-red-300"
+              className="flex items-center justify-center px-4 py-3 bg-red-50 text-red-700 font-medium rounded-xl hover:bg-red-100 transition-all duration-300 border border-red-200 hover:border-red-300 hover:shadow-md"
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Delete Property
@@ -216,15 +268,15 @@ export default function PropertyApprovalActions({
 
       {/* Approval Modal */}
       {showApprovalModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-3xl p-8 w-96 max-w-md mx-4 shadow-2xl border border-slate-200/50">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 w-96 max-w-md mx-4 shadow-2xl border border-purple-200/50">
             <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mr-4">
+              <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
                 <CheckCircle className="w-6 h-6 text-green-600" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-slate-900">Approve Property</h3>
-                <p className="text-sm text-slate-600">Add approval notes (optional)</p>
+                <p className="text-sm text-purple-600">Add approval notes (optional)</p>
               </div>
             </div>
             <textarea
@@ -335,22 +387,22 @@ export default function PropertyApprovalActions({
 
       {/* Reactivate Modal */}
       {showReactivateModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-3xl p-8 w-96 max-w-md mx-4 shadow-2xl border border-slate-200/50">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 w-96 max-w-md mx-4 shadow-2xl border border-purple-200/50">
             <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mr-4">
-                <RotateCcw className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                <RotateCcw className="w-6 h-6 text-purple-600" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-slate-900">Reactivate Property</h3>
-                <p className="text-sm text-slate-600">Add reactivation notes (optional)</p>
+                <p className="text-sm text-purple-600">Add reactivation notes (optional)</p>
               </div>
             </div>
             <textarea
               value={reactivateReason}
               onChange={(e) => setReactivateReason(e.target.value)}
               placeholder="Add reactivation notes (optional)..."
-              className="w-full p-4 border border-slate-200 rounded-xl mb-6 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              className="w-full p-4 border border-purple-200 rounded-xl mb-6 resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
               rows={3}
             />
             <div className="flex space-x-3">
@@ -363,7 +415,7 @@ export default function PropertyApprovalActions({
               <button
                 onClick={handleReactivate}
                 disabled={isProcessing}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold"
               >
                 {isProcessing ? 'Reactivating...' : 'Reactivate'}
               </button>

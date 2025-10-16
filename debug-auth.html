@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Auth</title>
+</head>
+<body>
+    <h1>Authentication Debug</h1>
+    <div id="debug"></div>
+    
+    <script>
+        function debugAuth() {
+            const adminAuth = localStorage.getItem('adminAuth');
+            const adminToken = localStorage.getItem('adminToken');
+            const adminUser = localStorage.getItem('adminUser');
+            
+            document.getElementById('debug').innerHTML = `
+                <p>adminAuth: ${adminAuth}</p>
+                <p>adminToken: ${adminToken ? 'Present' : 'Missing'}</p>
+                <p>adminUser: ${adminUser ? 'Present' : 'Missing'}</p>
+                <p>All localStorage keys: ${Object.keys(localStorage).join(', ')}</p>
+            `;
+        }
+        
+        debugAuth();
+    </script>
+</body>
+</html>
