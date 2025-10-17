@@ -1,6 +1,7 @@
 'use client'
 
-import { MapPin, Bed, Bath, Car, Square, Eye, Heart, MessageCircle, Star } from 'lucide-react'
+import { MapPin, Bed, Bath, Car, Square, Eye, Heart, MessageCircle, Star, Copy, Check } from 'lucide-react'
+import { useState } from 'react'
 import { Property } from '@/types'
 
 interface PropertyOverviewCardProps {
@@ -8,12 +9,24 @@ interface PropertyOverviewCardProps {
 }
 
 export default function PropertyOverviewCard({ property }: PropertyOverviewCardProps) {
+  const [copiedId, setCopiedId] = useState(false)
+
   const formatPrice = (price: number, currency: string = 'NGN') => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
     }).format(price)
+  }
+
+  const copyPropertyId = async () => {
+    try {
+      await navigator.clipboard.writeText(property.id)
+      setCopiedId(true)
+      setTimeout(() => setCopiedId(false), 2000)
+    } catch (error) {
+      console.error('Failed to copy property ID:', error)
+    }
   }
 
   const getStatusColor = (status: string) => {
@@ -34,94 +47,112 @@ export default function PropertyOverviewCard({ property }: PropertyOverviewCardP
   }
 
   return (
-    <div className="bg-white rounded-3xl shadow-sm border border-purple-200/60 overflow-hidden">
-      <div className="p-8">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+      <div className="p-6">
         {/* Header Section */}
-        <div className="flex items-start justify-between mb-8">
-          <div className="flex-1">
-            {/* Property Title - Most Prominent */}
-            <h1 className="text-4xl font-bold text-slate-900 mb-4 leading-tight">
-              {property.title}
-            </h1>
-            
-            {/* Property Description */}
-            {property.description && (
-              <p className="text-lg text-slate-600 mb-6 leading-relaxed">
-                {property.description}
-              </p>
-            )}
-            
-            <div className="flex items-center text-purple-600 mb-4">
-              <MapPin className="w-5 h-5 mr-3 text-purple-500" />
-              <span className="text-lg font-medium">{property.address}</span>
-            </div>
-            
-            {/* Price - Prominent */}
-            <div className="flex items-baseline space-x-3 mb-6">
-              <span className="text-5xl font-bold text-slate-900">
-                {formatPrice(property.price, property.currency)}
-              </span>
-              {property.listingType && (
-                <span className="text-xl text-slate-500 capitalize">
-                  / {property.listingType}
-                </span>
-              )}
-            </div>
-
-            {/* Key Specs - Unified Design */}
-            <div className="flex flex-wrap gap-4">
-              {property.bedrooms && (
-                <div className="flex items-center px-5 py-3 bg-purple-100 text-purple-700 rounded-2xl">
-                  <Bed className="w-5 h-5 mr-3 text-purple-600" />
-                  <span className="font-semibold text-lg">{property.bedrooms} bed{property.bedrooms !== 1 ? 's' : ''}</span>
-                </div>
-              )}
-              {property.bathrooms && (
-                <div className="flex items-center px-5 py-3 bg-purple-100 text-purple-700 rounded-2xl">
-                  <Bath className="w-5 h-5 mr-3 text-purple-600" />
-                  <span className="font-semibold text-lg">{property.bathrooms} bath{property.bathrooms !== 1 ? 's' : ''}</span>
-                </div>
-              )}
-              {property.size && (
-                <div className="flex items-center px-5 py-3 bg-purple-100 text-purple-700 rounded-2xl">
-                  <Square className="w-5 h-5 mr-3 text-purple-600" />
-                  <span className="font-semibold text-lg">{property.size.toLocaleString()} sq ft</span>
-                </div>
-              )}
-              {property.parking && (
-                <div className="flex items-center px-5 py-3 bg-purple-100 text-purple-700 rounded-2xl">
-                  <Car className="w-5 h-5 mr-3 text-purple-600" />
-                  <span className="font-semibold text-lg">{property.parking} parking</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Status Badge - Right Aligned */}
-          <div className="ml-8">
-            <span className={`inline-flex items-center px-4 py-2 rounded-2xl text-sm font-semibold border ${getStatusColor(property.status)}`}>
-              {property.status}
-            </span>
+        <div className="mb-6">
+          {/* Property Title */}
+          <h1 className="text-2xl font-bold text-gray-900 mb-3 leading-tight">
+            {property.title}
+          </h1>
+          
+          {/* Property Description */}
+          {property.description && (
+            <p className="text-gray-600 mb-4 leading-relaxed">
+              {property.description}
+            </p>
+          )}
+          
+          {/* Location */}
+          <div className="flex items-center text-gray-600 mb-4">
+            <MapPin className="w-4 h-4 mr-2 text-gray-500" />
+            <span className="text-sm">{property.address}</span>
           </div>
         </div>
 
+        {/* Price and Status Row */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-baseline space-x-2">
+            <span className="text-3xl font-bold text-gray-900">
+              {formatPrice(property.price, property.currency)}
+            </span>
+            {property.listingType && (
+              <span className="text-sm text-gray-500 capitalize">
+                / {property.listingType}
+              </span>
+            )}
+          </div>
+          
+          {/* Status Badge */}
+          <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(property.status)}`}>
+            {property.status}
+          </span>
+        </div>
 
-        {/* Property Details - Bottom Section */}
-        <div className="mt-8 pt-8 border-t border-purple-200">
-          <div className="grid grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-sm text-purple-600 mb-1">Property Type</div>
-              <div className="font-semibold text-slate-900 capitalize">{property.propertyType}</div>
+        {/* Key Specs */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          {property.bedrooms && (
+            <div className="flex items-center px-3 py-2 bg-gray-50 text-gray-700 rounded-lg">
+              <Bed className="w-4 h-4 mr-2 text-gray-600" />
+              <span className="text-sm font-medium">{property.bedrooms} bed{property.bedrooms !== 1 ? 's' : ''}</span>
             </div>
-            <div className="text-center">
-              <div className="text-sm text-purple-600 mb-1">Last Updated</div>
-              <div className="font-semibold text-slate-900">
+          )}
+          {property.bathrooms && (
+            <div className="flex items-center px-3 py-2 bg-gray-50 text-gray-700 rounded-lg">
+              <Bath className="w-4 h-4 mr-2 text-gray-600" />
+              <span className="text-sm font-medium">{property.bathrooms} bath{property.bathrooms !== 1 ? 's' : ''}</span>
+            </div>
+          )}
+          {property.size && (
+            <div className="flex items-center px-3 py-2 bg-gray-50 text-gray-700 rounded-lg">
+              <Square className="w-4 h-4 mr-2 text-gray-600" />
+              <span className="text-sm font-medium">{property.size.toLocaleString()} sq ft</span>
+            </div>
+          )}
+          {property.parking && (
+            <div className="flex items-center px-3 py-2 bg-gray-50 text-gray-700 rounded-lg">
+              <Car className="w-4 h-4 mr-2 text-gray-600" />
+              <span className="text-sm font-medium">{property.parking} parking</span>
+            </div>
+          )}
+        </div>
+
+        {/* Property Details */}
+        <div className="pt-4 border-t border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Property Type */}
+            <div className="text-left">
+              <div className="text-xs text-gray-500 mb-1">Property Type</div>
+              <div className="text-sm font-medium text-gray-900 capitalize">{property.propertyType}</div>
+            </div>
+
+            {/* Last Updated */}
+            <div className="text-left">
+              <div className="text-xs text-gray-500 mb-1">Last Updated</div>
+              <div className="text-sm font-medium text-gray-900">
                 {new Date(property.updatedAt).toLocaleDateString()}
               </div>
             </div>
-            <div className="text-center">
-              <div className="text-sm text-purple-600 mb-1">Property ID</div>
-              <div className="font-mono text-sm text-slate-500">{property.id.slice(0, 8)}...</div>
+
+            {/* Property ID with Copy */}
+            <div className="text-left">
+              <div className="text-xs text-gray-500 mb-1">Property ID</div>
+              <div className="flex items-center space-x-2">
+                <div className="text-xs font-mono text-gray-700 bg-gray-50 px-2 py-1 rounded border flex-1">
+                  {property.id}
+                </div>
+                <button
+                  onClick={copyPropertyId}
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Copy Property ID"
+                >
+                  {copiedId ? (
+                    <Check className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

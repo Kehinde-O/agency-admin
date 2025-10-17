@@ -2,10 +2,10 @@
 import { getAdminToken, updateAdminToken } from './auth'
 import { sanitizeProperty } from './error-handler'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://agency-backend-2-gkoj.onrender.com/api/v1'
 
 if (!process.env.NEXT_PUBLIC_API_URL) {
-  console.warn('NEXT_PUBLIC_API_URL environment variable is not set. Using default backend URL.')
+  console.warn('NEXT_PUBLIC_API_URL environment variable is not set. Using Vercel backend URL.')
 }
 
 interface ApiResponse<T> {
@@ -30,11 +30,13 @@ class ApiService {
     this.token = getAdminToken()
   }
 
-  private async request<T>(
+  async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`
+    
+    console.log('API Request:', { baseUrl: this.baseUrl, endpoint, fullUrl: url })
     
     // Get fresh token from localStorage for each request
     const currentToken = getAdminToken()
@@ -134,14 +136,33 @@ class ApiService {
   }
 
   async getPropertyById(id: string) {
-    const response = await this.request<{ property: any }>(`/properties/${id}`)
-    
-    // Sanitize property data
-    if (response.success && response.data.property) {
-      response.data.property = sanitizeProperty(response.data.property)
+    try {
+      // Try admin endpoint first
+      const response = await this.request<{ property: any }>(`/admin/properties/${id}`)
+      
+      // Sanitize property data
+      if (response.success && response.data.property) {
+        response.data.property = sanitizeProperty(response.data.property)
+      }
+      
+      return response
+    } catch (error) {
+      console.log('Admin endpoint failed, trying public endpoint...', error)
+      
+      // Fallback to public endpoint
+      try {
+        const fallbackResponse = await this.request<{ property: any }>(`/properties/${id}`)
+        
+        if (fallbackResponse.success && fallbackResponse.data.property) {
+          fallbackResponse.data.property = sanitizeProperty(fallbackResponse.data.property)
+        }
+        
+        return fallbackResponse
+      } catch (fallbackError) {
+        console.error('Both endpoints failed:', fallbackError)
+        throw fallbackError
+      }
     }
-    
-    return response
   }
 
   async approveProperty(id: string, reason?: string) {
@@ -209,19 +230,71 @@ class ApiService {
   }
 
   // User management
-  async getUsers(page = 1, limit = 20) {
-    return this.request<{ users: any[] }>(`/admin/users?page=${page}&limit=${limit}`)
+  async getUsers(page = 1, limit = 20, filters?: {
+    search?: string
+    role?: string
+    status?: string
+    isVerified?: boolean
+    sortBy?: string
+    sortOrder?: string
+  }) {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString()
+    })
+
+    if (filters) {
+      if (filters.search) params.append('search', filters.search)
+      if (filters.role) params.append('role', filters.role)
+      if (filters.status) params.append('status', filters.status)
+      if (filters.isVerified !== undefined) params.append('isVerified', filters.isVerified.toString())
+      if (filters.sortBy) params.append('sortBy', filters.sortBy)
+      if (filters.sortOrder) params.append('sortOrder', filters.sortOrder)
+    }
+
+    return this.request<{ users: any[] }>(`/admin/users?${params.toString()}`)
   }
 
   async getUserById(id: string) {
     return this.request<{ user: any }>(`/admin/users/${id}`)
   }
 
-  async updateUserStatus(id: string, status: string) {
+  async updateUserStatus(id: string, status: string, reason?: string) {
     return this.request<{ user: any }>(`/admin/users/${id}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
+      method: 'PUT',
+      body: JSON.stringify({ status, reason }),
     })
+  }
+
+  async updateUserRole(id: string, role: string) {
+    return this.request<{ user: any }>(`/admin/users/${id}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    })
+  }
+
+  async updateUser(id: string, data: any) {
+    return this.request<{ user: any }>(`/admin/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteUser(id: string) {
+    return this.request<{ message: string }>(`/admin/users/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  async getUserStats() {
+    return this.request<{
+      totalUsers: number
+      usersByRole: Record<string, number>
+      usersByStatus: Record<string, number>
+      verifiedUsers: number
+      newUsersThisMonth: number
+      activeUsers: number
+    }>('/admin/users/stats')
   }
 
   // Activity logs

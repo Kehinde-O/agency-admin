@@ -2,33 +2,28 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-  // Get the pathname of the request
   const path = request.nextUrl.pathname
 
-  // Skip middleware for API routes
-  if (path.startsWith('/api/')) {
+  // Skip middleware for API routes, static files, and auth pages
+  if (
+    path.startsWith('/api/') ||
+    path.startsWith('/_next/') ||
+    path.startsWith('/favicon.ico') ||
+    path === '/' ||
+    path.startsWith('/login')
+  ) {
     return NextResponse.next()
   }
 
-  // Check if the user is trying to access the dashboard without authentication
-  if (path.startsWith('/dashboard')) {
-    // Check for admin authentication in cookies
-    const adminAuth = request.cookies.get('adminAuth')?.value
-    const adminToken = request.cookies.get('adminToken')?.value
+  // Check for admin authentication on protected routes
+  if (path.startsWith('/dashboard') || path.startsWith('/users') || path.startsWith('/properties') || path.startsWith('/pending-properties') || path.startsWith('/reports') || path.startsWith('/settings')) {
+    // Check for admin token in cookies or headers
+    const adminToken = request.cookies.get('adminToken')?.value || 
+                      request.headers.get('authorization')?.replace('Bearer ', '')
     
-    // If no admin authentication, redirect to login
-    if (!adminAuth || !adminToken) {
+    if (!adminToken) {
+      // Redirect to login if no token found
       return NextResponse.redirect(new URL('/', request.url))
-    }
-  }
-
-  // Redirect authenticated users away from login page
-  if (path === '/') {
-    const adminAuth = request.cookies.get('adminAuth')?.value
-    const adminToken = request.cookies.get('adminToken')?.value
-    
-    if (adminAuth && adminToken) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
 

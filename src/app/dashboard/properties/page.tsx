@@ -371,7 +371,12 @@ export default function AllPropertiesPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <ImagePlaceholder className="w-full h-full" />
+                    <ImagePlaceholder 
+                      className="w-full h-full" 
+                      alt="Property image placeholder"
+                      width={300}
+                      height={200}
+                    />
                   )}
                   
                   {/* Status Badge */}
@@ -445,7 +450,7 @@ export default function AllPropertiesPage() {
                             {safeUserDisplayName(property.user)}
                           </div>
                           <div className="text-xs text-slate-500">
-                            {property.user.role === 'agent' ? 'Agent' : 'Owner'}
+                            {property.user.role === 'AGENT' ? 'Agent' : 'Owner'}
                           </div>
                         </div>
                       </div>

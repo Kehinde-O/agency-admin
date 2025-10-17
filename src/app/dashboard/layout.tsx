@@ -17,6 +17,7 @@ import { checkAdminAuth, getAdminUser, clearAdminAuth } from '@/lib/auth'
 import { safeCharAt } from '@/lib/error-handler'
 import { PageProvider, usePageTitle } from '@/contexts/PageContext'
 import AuthGuard from '@/components/AuthGuard'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -30,6 +31,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
   const { title, subtitle } = usePageTitle()
 
   useEffect(() => {
+    console.log('DashboardLayoutContent mounted')
     // Get admin user from localStorage
     const user = getAdminUser()
     if (user) {
@@ -99,7 +101,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-2xl border-r border-slate-200/60 transform transition-all duration-300 ease-in-out lg:translate-x-0 ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl border-r border-slate-200/60 transform transition-all duration-300 ease-in-out lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         {/* Sidebar Header */}
@@ -213,8 +215,12 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <PageProvider>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
-    </PageProvider>
+    <ErrorBoundary>
+      <PageProvider>
+        <AuthGuard>
+          <DashboardLayoutContent>{children}</DashboardLayoutContent>
+        </AuthGuard>
+      </PageProvider>
+    </ErrorBoundary>
   )
 }

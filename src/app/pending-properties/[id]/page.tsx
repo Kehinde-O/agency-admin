@@ -6,6 +6,8 @@ import { ArrowLeft, Share2, Bookmark, AlertTriangle } from 'lucide-react'
 import { Property } from '@/types'
 import { apiService } from '@/lib/api'
 import { usePageTitle } from '@/contexts/PageContext'
+import { useNotification } from '@/contexts/NotificationContext'
+import { sanitizeProperty } from '@/lib/error-handler'
 
 interface Booking {
   id: string
@@ -48,12 +50,15 @@ export default function PropertyDetailsPage() {
   const router = useRouter()
   const params = useParams()
   const { setPageTitle } = usePageTitle()
+  const { showSuccess, showError } = useNotification()
 
   useEffect(() => {
     const loadProperty = async () => {
       try {
         setIsLoading(true)
         const response = await apiService.getPropertyById(params.id as string)
+        
+        console.log('Property API response:', response)
         
         if (response.success) {
           setProperty(response.data.property)
@@ -109,13 +114,19 @@ export default function PropertyDetailsPage() {
       
       if (response.success) {
         setProperty({ ...property, status: 'ACTIVE' })
-        alert('Property approved successfully! It is now visible on the mobile app.')
+        showSuccess(
+          'Property Approved',
+          'Property is now visible on the mobile app and available for users to view and book.'
+        )
       } else {
         throw new Error(response.message || 'Failed to approve property')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to approve property:', error)
-      alert('Failed to approve property. Please try again.')
+      showError(
+        'Approval Failed',
+        error.message || 'Unable to approve property. Please check your connection and try again.'
+      )
     } finally {
       setIsProcessing(false)
     }
@@ -189,19 +200,7 @@ export default function PropertyDetailsPage() {
     router.push(`/dashboard/properties/${property?.id}/edit`)
   }
 
-  const handleFlag = async () => {
-    if (!property) return
-    const reason = prompt('Please provide a reason for flagging this property:')
-    if (reason) {
-      try {
-        await apiService.flagProperty(property.id, reason)
-        alert('Property flagged for review.')
-      } catch (error) {
-        console.error('Failed to flag property:', error)
-        alert('Failed to flag property. Please try again.')
-      }
-    }
-  }
+  // Removed flag functionality - all properties must be approved before displaying
 
   const handleContact = () => {
     if (property?.user?.email) {
@@ -305,7 +304,6 @@ export default function PropertyDetailsPage() {
               onPullDown={handlePullDown}
               onReactivate={handleReactivate}
               onEdit={handleEdit}
-              onFlag={handleFlag}
               onContact={handleContact}
               onViewMobile={handleViewMobile}
               onDelete={handleDelete}

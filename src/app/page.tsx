@@ -33,12 +33,16 @@ export default function AdminLogin() {
       const data = await response.json()
 
       if (data.success) {
-        // Store admin session with token
+        // Store admin session with token in localStorage
         localStorage.setItem('adminAuth', 'true')
         localStorage.setItem('adminEmail', data.data.user.email)
         localStorage.setItem('adminToken', data.data.token)
         localStorage.setItem('adminRefreshToken', data.data.refreshToken)
         localStorage.setItem('adminUser', JSON.stringify(data.data.user))
+        
+        // Also set cookies for middleware compatibility
+        document.cookie = `adminAuth=true; path=/; max-age=${24 * 60 * 60}` // 24 hours
+        document.cookie = `adminToken=${data.data.token}; path=/; max-age=${24 * 60 * 60}` // 24 hours
         
         console.log('Login successful, stored auth data:', {
           adminAuth: localStorage.getItem('adminAuth'),
@@ -46,10 +50,10 @@ export default function AdminLogin() {
           hasUser: !!localStorage.getItem('adminUser')
         })
         
-        // Add a small delay to ensure localStorage is set
+        // Add a small delay to ensure localStorage and cookies are set
         setTimeout(() => {
           router.push('/dashboard')
-        }, 100)
+        }, 200)
       } else {
         // Always show generic error message for security
         setError('Invalid email or password')
@@ -158,14 +162,7 @@ export default function AdminLogin() {
             © 2024 Agency Admin. All rights reserved.
           </p>
           <p className="text-slate-400 text-xs">
-            Having trouble? Try the{' '}
-            <a 
-              href="/force-login" 
-              className="text-slate-600 hover:text-slate-800 underline"
-            >
-              Force Login
-            </a>{' '}
-            page.
+            Having trouble? Contact your system administrator.
           </p>
         </div>
       </div>

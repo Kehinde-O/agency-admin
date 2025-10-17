@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import ActivityFeed from '@/components/ActivityFeed'
 import { usePageTitle } from '@/contexts/PageContext'
+import { clearAdminAuth } from '@/lib/auth'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -22,6 +23,7 @@ export default function Dashboard() {
   const { setPageTitle } = usePageTitle()
 
   useEffect(() => {
+    console.log('Dashboard component mounted')
     setPageTitle('Dashboard', 'Agency overview and management')
   }, [setPageTitle])
 
@@ -403,6 +405,11 @@ export default function Dashboard() {
       default:
         return null
     }
+  }
+
+  const handleLogout = () => {
+    clearAdminAuth()
+    router.push('/')
   }
 
   return (

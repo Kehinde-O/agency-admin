@@ -32,7 +32,7 @@ module.exports = {
           800: '#9a3412',
           900: '#7c2d12',
         },
-        background: '#f5f7fa',
+        background: '#f9fcfd',
         surface: '#f9fafc',
         text: {
           primary: '#2d3436',

@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import ImagePlaceholder from '@/components/ImagePlaceholder'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import { 
   Eye, 
   Clock, 
@@ -60,7 +61,7 @@ export default function AllPropertiesPage() {
       const token = localStorage.getItem('adminToken')
       if (!token) {
         console.log('No authentication token found, redirecting to login')
-        router.push('/simple-login')
+        router.push('/')
         return
       }
       
@@ -306,17 +307,10 @@ export default function AllPropertiesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* Header */}
+      {/* Stats and Controls */}
       <div className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-slate-200/50">
-        <div className="px-8 py-8">
+        <div className="px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <h1 className="text-4xl font-bold text-slate-900">
-                All Properties
-              </h1>
-              <p className="text-slate-600 text-lg">Comprehensive property listing management and review system</p>
-            </div>
-            
             <div className="flex items-center space-x-4">
               <div className="bg-slate-50 px-6 py-3 rounded-xl border border-slate-200 shadow-sm">
                 <div className="flex items-center space-x-3">
@@ -326,14 +320,15 @@ export default function AllPropertiesPage() {
                   </span>
                 </div>
               </div>
-              <button
-                onClick={handleRefresh}
-                disabled={isLoading}
-                className="p-3 rounded-xl hover:bg-slate-100 transition-all duration-200 disabled:opacity-50 group border border-slate-200 shadow-sm"
-              >
-                <RefreshCw className={`w-5 h-5 text-slate-600 group-hover:text-slate-900 ${isLoading ? 'animate-spin' : ''}`} />
-              </button>
             </div>
+            
+            <button
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="p-3 rounded-xl hover:bg-slate-100 transition-all duration-200 disabled:opacity-50 group border border-slate-200 shadow-sm"
+            >
+              <RefreshCw className={`w-5 h-5 text-slate-600 group-hover:text-slate-900 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
       </div>
@@ -475,13 +470,11 @@ export default function AllPropertiesPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <RefreshCw className="w-8 h-8 text-slate-600 animate-spin" />
-          </div>
-                <p className="text-slate-600 font-medium">Loading properties...</p>
-                <p className="text-slate-500 text-sm mt-1">Please wait while we fetch the latest data</p>
-        </div>
+              <LoadingSpinner 
+                message="Loading properties..." 
+                size="lg"
+                className="text-center"
+              />
             </div>
           ) : viewMode === 'grid' ? (
             <div className="p-6">

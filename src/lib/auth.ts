@@ -60,11 +60,16 @@ export const setAdminAuth = (user: AdminUser, token: string, refreshToken: strin
 export const clearAdminAuth = (): void => {
   if (typeof window === 'undefined') return
   
+  // Clear localStorage
   localStorage.removeItem('adminAuth')
   localStorage.removeItem('adminEmail')
   localStorage.removeItem('adminToken')
   localStorage.removeItem('adminRefreshToken')
   localStorage.removeItem('adminUser')
+  
+  // Clear cookies
+  document.cookie = 'adminAuth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+  document.cookie = 'adminToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
 }
 
 export const verifyAdminToken = async (): Promise<boolean> => {

@@ -6,19 +6,44 @@ export interface User {
   firstName?: string
   lastName?: string
   name?: string
-  role: 'user' | 'agent' | 'admin'
-  status: 'active' | 'inactive' | 'suspended'
+  role: 'USER' | 'AGENT' | 'ADMIN' | 'OWNER'
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
   phone?: string
   profileImage?: string
+  isEmailVerified?: boolean
   isVerified?: boolean
   rating?: number | string
   listingsCount?: number
   isAgent?: boolean
+  isPremium?: boolean
   licenseNumber?: string
   experience?: number
   companyName?: string
   createdAt: string
+  updatedAt?: string
+  lastActive?: string
   lastLogin?: string
+  // Additional fields for user management
+  properties?: Array<{
+    id: string
+    title: string
+    status: string
+    createdAt: string
+  }>
+  bookings?: Array<{
+    id: string
+    status: string
+    createdAt: string
+    property: {
+      id: string
+      title: string
+    }
+  }>
+  _count?: {
+    properties: number
+    bookings: number
+  }
+  reviewsCount?: number
 }
 
 export interface Property {
@@ -41,6 +66,7 @@ export interface Property {
   bedrooms?: number
   bathrooms?: number
   size?: number
+  area?: number
   parking?: number
   floor?: number
   totalFloors?: number

@@ -126,11 +126,33 @@ export function sanitizeProperty(property: any): any {
       firstName: property.user.firstName || '',
       lastName: property.user.lastName || '',
       email: property.user.email || '',
-      isVerified: Boolean(property.user.isVerified)
+      phone: property.user.phone || '',
+      isVerified: Boolean(property.user.isVerified),
+      isAgent: Boolean(property.user.isAgent),
+      companyName: property.user.companyName || '',
+      licenseNumber: property.user.licenseNumber || '',
+      experience: property.user.experience || 0,
+      rating: property.user.rating || 0,
+      reviewsCount: property.user.reviewsCount || 0,
+      listingsCount: property.user.listingsCount || 0,
+      createdAt: property.user.createdAt || ''
     } : null,
     owner: property.owner ? {
       ...property.owner,
       name: property.owner.name || ''
+    } : null,
+    agent: property.agent ? {
+      ...property.agent,
+      id: property.agent.id || '',
+      firstName: property.agent.firstName || '',
+      lastName: property.agent.lastName || '',
+      email: property.agent.email || '',
+      phone: property.agent.phone || '',
+      isVerified: Boolean(property.agent.isVerified),
+      companyName: property.agent.companyName || '',
+      licenseNumber: property.agent.licenseNumber || '',
+      experience: property.agent.experience || 0,
+      rating: property.agent.rating || 0
     } : null
   }
 }
